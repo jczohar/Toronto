@@ -1753,7 +1753,7 @@ async function fetchRoute(mode, a, b) {
 }
 const fmtMin = m => m < 60 ? `${Math.max(1, Math.round(m))} דק'` : `${Math.floor(m / 60)} ש' ${Math.round(m % 60)} דק'`;
 function toFullscreen(wrap, maps) {
-  const on = wrap.classList.toggle('fs'); const b = wrap.querySelector('[data-fs]'); if (b) b.textContent = on ? '✕ יציאה ממסך מלא' : '⛶ מסך מלא';
+  const on = wrap.classList.toggle('fs'); const b = wrap.querySelector('[data-fs],[data-fs2],[data-fsr]'); if (b) b.textContent = on ? '✕' : '⛶';
   setTimeout(() => (maps || []).forEach(m => { try { m && m._loaded && m.invalidateSize(); } catch (e) { } }), 120);
 }
 
@@ -1874,7 +1874,7 @@ let MGROUP = null, MROUTE = null, MSEL = null;
 function renderMapTab() {
   view().innerHTML = `<div class="bar"><button class="btn gold" data-act="pick">📍 בחר מקום במפה</button><button class="btn alt" data-act="gview">${MS.gmode ? '↩ למפה האינטראקטיבית' : '🌐 תצוגת Google Maps'}</button><button class="btn alt" data-act="myloc">🎯 איפה אני?</button><button class="btn alt" data-act="cityMap">🏙️ מפת העיר</button></div>
 <div class="chips">${MAPCATS.map(([k, l, e]) => `<span class="pill ${MS.cats[k] ? 'on' : ''}" data-mcat="${k}">${e} ${l}</span>`).join('')}</div>
-<div class="mapwrap" id="mw">${MS.gmode ? '<iframe id="gfr" allowfullscreen loading="lazy"></iframe>' : '<div id="map" class="map"></div>'}<div class="mapctl"><button data-fs>⛶ מסך מלא</button><button data-act="pick">📍 בחר מקום</button>${MS.gmode ? '' : '<button data-act="myloc">🎯</button>'}</div><div class="mapinfo hide" id="minfo"></div></div>
+<div class="mapwrap" id="mw">${MS.gmode ? '<iframe id="gfr" allowfullscreen loading="lazy"></iframe>' : '<div id="map" class="map"></div>'}<div class="mapctl"><button data-fs title="מסך מלא" aria-label="מסך מלא">⛶</button><button data-act="pick" title="בחר מקום" aria-label="בחר מקום">📍</button><button data-act="cityHome" title="חזרה למפת העיר" aria-label="חזרה למפת העיר">🏙️</button>${MS.gmode ? '' : '<button data-act="myloc" title="איפה אני" aria-label="איפה אני">🎯</button>'}</div><div class="mapinfo hide" id="minfo"></div></div>
 <p class="note">המפה פועלת בלי מפתח וללא הרשמה (OpenStreetMap). לחצו על סמל במפה לקבלת פרטים ומסלול. הכתובות והמסלולים הם הנחיה כללית – אמתו לפני יציאה.</p>`;
   if (MS.gmode) setGFrame(); else initMainMap();
   if (MS.sel) showInfo(MS.sel);
@@ -1972,7 +1972,7 @@ ${TRANSPORT.map(b => `<div class="blk"><h3>${b.icon} ${b.title}</h3><ul>${b.item
   const opts = STNL.filter(s => !(s.lines.length === 1 && ['L5', 'L6'].includes(s.lines[0]))).sort((a, b) => a.he.localeCompare(b.he, 'he')).map(s => `<option value="${esc(s.en)}">${esc(s.he)} (${s.en})</option>`).join('');
   view().innerHTML = `<div class="sec-h"><h2>🚇 מפת מטרו</h2>${seg}</div>
 <div class="legend">${lg}</div>
-<div class="mapwrap" id="mw2"><div id="map2" class="map"></div><div class="mapctl"><button data-fs2>⛶ מסך מלא</button><button data-act="m2fit">🏙️ כל הרשת</button></div></div>
+<div class="mapwrap" id="mw2"><div id="map2" class="map"></div><div class="mapctl"><button data-fs2 title="מסך מלא" aria-label="מסך מלא">⛶</button><button data-act="m2fit" title="כל הרשת" aria-label="כל הרשת">🏙️</button></div></div>
 <p class="note">קווים 1, 2, 4 (מטרו) מדויקים לפי מיקום תחנות. קווים 5 ו-6 (רכבת קלה) מוצגים בקירוב – רק התחנות העיקריות. לחצו על תחנה לראות אתרים סמוכים.</p>
 <div id="stInfo"></div>
 <div class="blk"><h3>🧭 מדריך הגעה ממקום למקום במטרו</h3><div class="grid2"><div class="fld"><label>מתחנה</label><select id="mFrom"><option value="">בחרו…</option>${opts}</select></div><div class="fld"><label>לתחנה</label><select id="mTo"><option value="">בחרו…</option>${opts}</select></div></div><div class="bar"><button class="btn" id="mGo">חשב מסלול</button><button class="btn alt" id="mSw">⇄ הפוך</button></div><div id="mRes"></div></div>`;
@@ -2222,7 +2222,7 @@ function renderRouteView(rt) {
 <div class="note">המסלול נשמר אוטומטית בכל שינוי. אפשר לשנות את אמצעי התחבורה בכל קטע, להזיז מקומות בין ימים ולהוסיף הערות.</div>
 ${cf.length ? cf.map(c => `<div class="alert b"><span class="ic">⛔</span><div><b>${esc(c.it.he)}</b> סגור ב${wdName(c.date)} (יום ${c.di + 1}).</div></div>`).join('') : ''}
 <div class="chips" id="rdchips"><span class="pill ${RV.day === 'all' ? 'on' : ''}" data-r="mday" data-d="all">🗺️ כל הימים</span>${rt.days.map((_, i) => `<span class="pill ${RV.day == i ? 'on' : ''}" data-r="mday" data-d="${i}" style="border-color:${DAYCOL[i % 10]}">יום ${i + 1}</span>`).join('')}</div>
-<div class="mapwrap" id="rmw"><div id="rmap" class="map" style="height:46vh"></div><div class="mapctl"><button data-fsr>⛶ מסך מלא</button></div></div>
+<div class="mapwrap" id="rmw"><div id="rmap" class="map" style="height:46vh"></div><div class="mapctl"><button data-fsr title="מסך מלא" aria-label="מסך מלא">⛶</button></div></div>
 <p class="note">הקווים המקווקווים הם תחבורה ציבורית (קו ישר בין התחנות). בבחירת יום בודד מוצג המסלול בדרכים בפועל להליכה/רכב/אופניים. המספרים לפי סדר הביקור.</p>
 ${rt.days.map((_, i) => dayHTML(rt, i)).join('')}
 <div class="blk"><h3>📎 מסמכים, תמונות וקישורים למסלול</h3><div class="note">אפשר לצרף קישור (לכרטיסים, אישורי הזמנה, תמונות בענן וכו') עם תיאור קצר.</div>${(rt.docs || []).map((d, i) => `<div class="row" style="display:flex;gap:6px;align-items:center;margin:5px 0"><a href="${esc(d.u)}" target="_blank" rel="noopener" style="flex:1;word-break:break-word"><b>${esc(d.t || d.u)}</b></a><span class="note" style="flex:2">${esc(d.d || '')}</span><button class="btn sm alt" data-r="docE" data-i="${i}">✏️</button><button class="btn sm alt" data-r="docD" data-i="${i}">🗑</button></div>`).join('') || '<div class="note">אין עדיין קישורים.</div>'}<div class="bar"><button class="btn sm" data-r="docA">➕ הוספת קישור</button></div></div>
@@ -2567,8 +2567,9 @@ async function myLoc() {
   toast('מאתר מיקום…', 4000);
   try {
     const p = await getPos(); MS.me = p; if (TAB !== 'map') showTab('map');
+    if (hav(p, CITY) > 40) toast('אתם מחוץ לאזור טורונטו – לחצו על 🏙️ במפה כדי לחזור', 5000);
     if (MS.gmode) { MS.sel = { id: 'me', he: 'המיקום שלי', lat: p.lat, lng: p.lng, sec: 'sites' }; setGFrame(); showInfo(MS.sel); }
-    else if (MAP) { try { if (MS.meL) MAP.removeLayer(MS.meL); } catch (e) { } MS.meL = L.marker([p.lat, p.lng], { icon: mkIcon('🔵', true) }).addTo(MAP).bindTooltip('אני כאן'); MAP.flyTo([p.lat, p.lng], 15); }
+    else if (MAP) { try { if (MS.meL) MAP.removeLayer(MS.meL); } catch (e) { } MS.meL = L.marker([p.lat, p.lng], { icon: mkIcon('🔵', true) }).addTo(MAP).bindTooltip('אני כאן'); MAP.flyTo([p.lat, p.lng], 15); } if (hav(p, CITY) > 40) toast('אתם מחוץ לאזור טורונטו – לחצו על 🏙️ במפה כדי לחזור', 5000);
   } catch (e) { toast('לא ניתן לקבל מיקום – אשרו את הרשאת המיקום'); }
 }
 
@@ -2605,6 +2606,7 @@ document.addEventListener('click', e => {
     case 'gview': MS.gmode = !MS.gmode; destroyMap(); return renderMapTab();
     case 'myloc': return myLoc();
     case 'cityMap': MS.sel = null; MS.route = null; S.last.map = null; destroyMap(); if (TAB !== 'map') return showTab('map'); return renderMapTab();
+    case 'cityHome': { MS.sel = null; MS.route = null; S.last.map = null; const b = $('#minfo'); if (b) b.classList.add('hide'); if (MS.gmode) { setGFrame(); return; } if (MAP) { if (MROUTE) { MAP.removeLayer(MROUTE); MROUTE = null; } if (MSEL) { MAP.removeLayer(MSEL); MSEL = null; } MAP.flyTo([CITY.lat, CITY.lng], 12, { duration: .8 }); } return; }
     case 'backMap': return showTab('map');
     case 'minfoX': { const b = $('#minfo'); if (b) b.classList.add('hide'); return; }
     case 'routeTo': return MS.sel && routeSheet(MS.sel);
